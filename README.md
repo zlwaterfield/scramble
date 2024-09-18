@@ -9,6 +9,8 @@ Scramble is an open-source Chrome extension that leverages AI to enhance your wr
 3. Enable "Developer mode" in the top right
 4. Click "Load unpacked" and select the extension directory
 
+> Currently pending review on Chrome Web Store. Once approved, you can install it from there.
+
 ## Usage
 
 1. Highlight text on any webpage
