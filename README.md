@@ -18,6 +18,10 @@ Scramble is an open-source Chrome extension that leverages AI to enhance your wr
 3. Select "Scramble" and choose a text enhancement option
 4. Wait for the AI to process and enhance your text
 
+Screenshot:
+<img width="728" alt="Screenshot 2024-09-17 at 10 14 30 PM" src="https://github.com/user-attachments/assets/7a8685e5-94dd-47be-a141-f84bcbf1321f">
+
+
 ## Default Prompts
 
 Scramble comes with several pre-configured text enhancement options:
