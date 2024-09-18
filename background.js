@@ -62,17 +62,17 @@ async function enhanceTextWithLLM(promptId, text) {
     throw new Error('OpenAI API key not set. Please set it in the extension options.');
   }
 
-  const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId).title;
+  const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId).prompt;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
+        'Authorization': `Bearer ${encodeURIComponent(openaiApiKey)}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: 'You are a helpful assistant.' },
           { role: 'user', content: `${prompt}:\n\n${text}` }
@@ -89,8 +89,7 @@ async function enhanceTextWithLLM(promptId, text) {
     const data = await response.json();
     return data.choices[0].message.content.trim();
   } catch (error) {
-    console.error('Error calling OpenAI API:', error);
-    throw new Error(`Failed to enhance text. Please try again later. Error: ${error.message}`);
+    throw new Error(`Failed to enhance text. Please check your API key and try again. Error: ${error.message}`);
   }
 }
 
