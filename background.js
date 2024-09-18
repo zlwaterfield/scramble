@@ -65,7 +65,10 @@ async function enhanceTextWithLLM(promptId, text) {
   const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId).prompt;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    let url = 'https://api.openai.com/v1/chat/completions'; // OpenAI
+    url = 'http://localhost:11434/v1/chat/completions'; // experimental(?!?) openai compatible ollama https://github.com/ollama/ollama/blob/main/docs/openai.md
+    url = 'http://localhost:1234/v1/chat/completions'; // LM Studio https://lmstudio.ai/docs/local-server
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
