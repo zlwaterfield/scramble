@@ -48,6 +48,7 @@ Planned features include:
 - Integration with other AI services
 - View diff between original and improved text
 - Underline grammar / spelling issues
+- Local LLM so it doesn't rely on a third party
 
 ## Contributing
 
