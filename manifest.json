@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Scramble",
+  "version": "1.0",
+  "description": "A Grammarly-like text enhancement tool using LLMs",
+  "icons": {
+    "256": "assets/logo256.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://api.openai.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "options_page": "options.html",
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
