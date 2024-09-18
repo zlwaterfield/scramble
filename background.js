@@ -1,3 +1,7 @@
+if (typeof chrome === undefined) {
+  var chrome = browser;
+}
+
 // Define default prompts
 const DEFAULT_PROMPTS = [
   { id: 'fix_grammar', title: 'Fix spelling and grammar', prompt: 'Please correct any spelling errors and grammatical mistakes in the following text:' },
@@ -56,7 +60,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Function to interact with OpenAI API
 async function enhanceTextWithLLM(promptId, text) {
   // Retrieve API key from storage
-  const { openaiApiKey, llmUrl, llmModel } = await chrome.storage.sync.get(['openaiApiKey', 'llmUrl', 'llmModel']);
+  const { openaiApiKey, llmUrl, llmModel } = await browser.storage.sync.get({'openaiApiKey': '', 'llmUrl': '', 'llmModel': ''});
   
   if (!openaiApiKey) {
     throw new Error('OpenAI API key not set. Please set it in the extension options.');
