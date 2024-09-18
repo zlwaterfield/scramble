@@ -1,4 +1,4 @@
-# Scramble - Open-Source Grammarly Alternative Chrome Extension
+# Scramble - Open-Source Grammarly Alternative
 
 Scramble is an open-source Chrome extension that leverages AI to enhance your writing directly in your browser. It's designed to be a more customizable and privacy-respecting alternative to Grammarly.
 
