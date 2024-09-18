@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Scramble",
   "version": "1.0",
-  "description": "A Grammarly-like text enhancement tool using LLMs",
+  "description": "An Open-Source Grammarly alternative",
   "icons": {
     "256": "assets/logo256.png"
   },
