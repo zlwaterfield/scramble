@@ -47,6 +47,7 @@ Planned features include:
 - Enhanced context awareness
 - Integration with other AI services
 - View diff between original and improved text
+- Underline grammar / spelling issues
 
 ## Contributing
 
