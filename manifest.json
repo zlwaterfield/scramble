@@ -13,6 +13,8 @@
     "contextMenus"
   ],
   "host_permissions": [
+    "http://localhost:*/*",
+    "https://api.groq.com/*",
     "https://api.openai.com/*"
   ],
   "background": {

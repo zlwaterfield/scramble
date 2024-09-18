@@ -56,23 +56,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Function to interact with OpenAI API
 async function enhanceTextWithLLM(promptId, text) {
   // Retrieve API key from storage
-  const { openaiApiKey } = await chrome.storage.sync.get(['openaiApiKey']);
+  const { openaiApiKey, llmUrl, llmModel } = await chrome.storage.sync.get(['openaiApiKey', 'llmUrl', 'llmModel']);
   
   if (!openaiApiKey) {
     throw new Error('OpenAI API key not set. Please set it in the extension options.');
   }
 
   const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId).prompt;
+  const endpoint = llmUrl || 'https://api.openai.com/v1/chat/completions';
+  const model = llmModel || 'gpt-4o-mini';
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${encodeURIComponent(openaiApiKey)}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: model,
         messages: [
           { role: 'system', content: 'You are a helpful assistant.' },
           { role: 'user', content: `${prompt}:\n\n${text}` }
