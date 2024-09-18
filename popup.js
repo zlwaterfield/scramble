@@ -3,8 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const optionsButton = document.getElementById('optionsButton');
 
     // Check if API key is set
-    chrome.storage.sync.get(['apiKey'], function(result) {
-        if (result.apiKey) {
+    chrome.storage.sync.get(['openaiApiKey'], function(result) {
+      console.log(result);
+        if (result.openaiApiKey) {
             statusElement.textContent = 'Extension is ready to use.';
         } else {
             statusElement.textContent = 'API key not set. Please set it in the options.';
