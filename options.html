@@ -52,6 +52,14 @@
         OpenAI API Key:
         <input type="text" id="openaiApiKey" placeholder="Enter your OpenAI API key">
     </label>
+    <label for="llmUrl">
+        LLM URL (only change if using a different provider, like Ollama or Groq):
+        <input type="text" id="llmUrl" placeholder="Enter an altenative URL for local use">
+    </label>
+    <label for="llmModel">
+        Defaults to GPT-4o-mini:
+        <input type="text" id="llmModel" placeholder="Enter an altenative LLM model">
+    </label>
     <button id="save">Save</button>
     <div id="status"></div>
     <script src="options.js"></script>

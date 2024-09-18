@@ -1,3 +1,7 @@
+if (typeof chrome === undefined) {
+  var chrome = browser;
+}
+
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enhanceText') {
@@ -45,7 +49,21 @@ function replaceSelectedText(enhancedText) {
     range.deleteContents();
     range.insertNode(document.createTextNode(enhancedText));
     selection.removeAllRanges();
-  }
+  } else {
+    let activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA")) {
+        let selectionStart = activeElement.selectionStart;
+        let selectionEnd = activeElement.selectionEnd;
+        let selectedText = activeElement.value.substring(selectionStart, selectionEnd);
+
+        activeElement.setRangeText(enhancedText);
+
+        let node = document.createElement("div");
+        node.textContent = "Original selection: " + selectedText;
+        node.style.color = "blue";
+        activeElement.parentNode.insertBefore(node, activeElement.nextSibling);
+      }
+    }
 }
 
 // Function to show error notification

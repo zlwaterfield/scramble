@@ -1,8 +1,10 @@
 // Saves options to chrome.storage
 function saveOptions() {
     const openaiApiKey = document.getElementById('openaiApiKey').value;
+    const llmUrl = document.getElementById('llmUrl').value;
+    const llmModel = document.getElementById('llmModel').value;
     chrome.storage.sync.set(
-        { openaiApiKey },
+        { openaiApiKey, llmUrl, llmModel },
         () => {
             // Update status to let user know options were saved.
             const status = document.getElementById('status');
@@ -18,9 +20,11 @@ function saveOptions() {
 // stored in chrome.storage.
 function restoreOptions() {
     chrome.storage.sync.get(
-        { openaiApiKey: '' },
+        { openaiApiKey: '', llmUrl: '', llmModel: '' },
         (items) => {
             document.getElementById('openaiApiKey').value = items.openaiApiKey;
+            document.getElementById('llmUrl').value = items.llmUrl;
+            document.getElementById('llmModel').value = items.llmModel;
         }
     );
 }
