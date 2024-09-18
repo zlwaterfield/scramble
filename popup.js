@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check if API key is set
     chrome.storage.sync.get(['openaiApiKey'], function(result) {
-      console.log(result);
         if (result.openaiApiKey) {
             statusElement.textContent = 'Extension is ready to use.';
         } else {

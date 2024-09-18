@@ -17,14 +17,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Function to enhance selected text
 async function enhanceSelectedText(promptId, selectedText) {
-  console.log('Enhancing selected text:', selectedText, promptId);
+  console.log('[SCRAMBLE] Selected text:', promptId, selectedText);
   try {
     const response = await chrome.runtime.sendMessage({
       action: 'enhanceText',
       promptId: promptId,
       selectedText: selectedText,
     });
-    console.log('Response:', response);
+    console.log('[SCRAMBLE] Response:', response);
 
     if (response.success) {
       return response.enhancedText;
