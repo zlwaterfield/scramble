@@ -1,6 +1,12 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Scramble",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "scramble@zlwaterfield.com",
+      "strict_min_version": "42.0"
+      }
+    },
   "version": "1.0",
   "description": "An Open-Source Grammarly alternative",
   "icons": {
@@ -18,7 +24,7 @@
     "https://api.openai.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
   },
   "content_scripts": [
     {
