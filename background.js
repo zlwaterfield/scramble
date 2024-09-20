@@ -86,7 +86,7 @@ async function enhanceWithOpenAI(apiKey, prompt) {
         'Authorization': `Bearer ${encodeURIComponent(apiKey)}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: 'You are a helpful assistant.' },
           { role: 'user', content: prompt }
