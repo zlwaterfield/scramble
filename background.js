@@ -26,11 +26,28 @@ chrome.runtime.onInstalled.addListener(() => {
     });
   });
 });
+// Use 'browser' instead of 'chrome'
+browser.runtime.onInstalled.addListener(() => {
+  browser.contextMenus.create({
+    id: 'scramble',
+    title: 'Scramble',
+    contexts: ['selection'],
+  });
+
+  DEFAULT_PROMPTS.forEach(prompt => {
+    browser.contextMenus.create({
+      id: prompt.id,
+      parentId: 'scramble',
+      title: prompt.title,
+      contexts: ['selection'],
+    });
+  });
+});
 
 // Handle context menu clicks
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+browser.contextMenus.onClicked.addListener((info, tab) => {
   if (DEFAULT_PROMPTS.some(prompt => prompt.id === info.menuItemId)) {
-    chrome.tabs.sendMessage(tab.id, {
+    browser.tabs.sendMessage(tab.id, {
       action: 'enhanceText',
       promptId: info.menuItemId,
       selectedText: info.selectionText,
@@ -39,7 +56,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 // Handle messages from content script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enhanceText') {
     enhanceTextWithRateLimit(request.promptId, request.selectedText)
       .then(enhancedText => {
@@ -56,8 +73,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Function to interact with OpenAI API
 async function enhanceTextWithLLM(promptId, text) {
   // Retrieve API key from storage
-  const { openaiApiKey } = await chrome.storage.sync.get(['openaiApiKey']);
-  
+  const { openaiApiKey } = await browser.storage.sync.get('openaiApiKey');
+
   if (!openaiApiKey) {
     throw new Error('OpenAI API key not set. Please set it in the extension options.');
   }
@@ -69,13 +86,13 @@ async function enhanceTextWithLLM(promptId, text) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${encodeURIComponent(openaiApiKey)}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo', // Update to a model available to you
         messages: [
           { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: `${prompt}:\n\n${text}` }
+          { role: 'user', content: `${prompt}\n\n${text}` }
         ],
         max_tokens: 1000,
         temperature: 0.7,
@@ -83,7 +100,8 @@ async function enhanceTextWithLLM(promptId, text) {
     });
 
     if (!response.ok) {
-      throw new Error('API request failed');
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.error.message}`);
     }
 
     const data = await response.json();
