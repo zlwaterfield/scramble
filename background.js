@@ -26,11 +26,28 @@ chrome.runtime.onInstalled.addListener(() => {
     });
   });
 });
+// Use 'browser' instead of 'chrome'
+browser.runtime.onInstalled.addListener(() => {
+  browser.contextMenus.create({
+    id: 'scramble',
+    title: 'Scramble',
+    contexts: ['selection'],
+  });
+
+  DEFAULT_PROMPTS.forEach(prompt => {
+    browser.contextMenus.create({
+      id: prompt.id,
+      parentId: 'scramble',
+      title: prompt.title,
+      contexts: ['selection'],
+    });
+  });
+});
 
 // Handle context menu clicks
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+browser.contextMenus.onClicked.addListener((info, tab) => {
   if (DEFAULT_PROMPTS.some(prompt => prompt.id === info.menuItemId)) {
-    chrome.tabs.sendMessage(tab.id, {
+    browser.tabs.sendMessage(tab.id, {
       action: 'enhanceText',
       promptId: info.menuItemId,
       selectedText: info.selectionText,
@@ -39,7 +56,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 // Handle messages from content script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enhanceText') {
     enhanceTextWithRateLimit(request.promptId, request.selectedText)
       .then(enhancedText => {
@@ -56,7 +73,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Function to interact with various LLM APIs
 async function enhanceTextWithLLM(promptId, text) {
   // Retrieve settings from storage
-  const { llmProvider, openaiApiKey, anthropicApiKey, ollamaEndpoint } = await chrome.storage.sync.get(['llmProvider', 'openaiApiKey', 'anthropicApiKey', 'ollamaEndpoint']);
+  const { llmProvider, openaiApiKey, anthropicApiKey, ollamaEndpoint } = await browser.storage.sync.get(['llmProvider', 'openaiApiKey', 'anthropicApiKey', 'ollamaEndpoint']);
   
   const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId).prompt;
   const fullPrompt = `${prompt}:\n\n${text}`;
@@ -86,7 +103,7 @@ async function enhanceWithOpenAI(apiKey, prompt) {
         'Authorization': `Bearer ${encodeURIComponent(apiKey)}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo', // Update to a model available to you
         messages: [
           { role: 'system', content: 'You are a helpful assistant.' },
           { role: 'user', content: prompt }
@@ -97,7 +114,8 @@ async function enhanceWithOpenAI(apiKey, prompt) {
     });
 
     if (!response.ok) {
-      throw new Error('API request failed');
+      const errorData = await response.json();
+      throw new Error(`API request failed: ${errorData.error.message}`);
     }
 
     const data = await response.json();

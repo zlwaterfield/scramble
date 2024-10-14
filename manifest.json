@@ -1,30 +1,36 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Scramble",
-  "version": "1.0",
+  "version": "1.1",
   "description": "An Open-Source Grammarly alternative",
   "icons": {
     "256": "assets/logo256.png"
   },
   "permissions": [
     "activeTab",
-    "scripting",
     "storage",
-    "contextMenus"
-  ],
-  "host_permissions": [
+    "contextMenus",
     "https://api.openai.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["libs/diff.min.js", "content.js"]
     }
   ],
-  "options_page": "options.html",
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "scramble@example.com",
+      "strict_min_version": "48.0"
+    }
+  },
   "action": {
     "default_popup": "popup.html"
   },
