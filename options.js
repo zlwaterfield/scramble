@@ -7,7 +7,8 @@ function saveOptions() {
     apiKey: document.getElementById('apiKey').value,
     llmModel: document.getElementById('llmModel').value,
     customEndpoint: document.getElementById('customEndpoint').value,
-    showDiff: document.getElementById('showDiff').checked
+    showDiff: document.getElementById('showDiff').checked,
+    customPrompts: getCustomPrompts()
   };
 
   browserAPI.storage.sync.set(options, () => {
@@ -20,6 +21,20 @@ function saveOptions() {
   });
 }
 
+function getCustomPrompts() {
+  const promptContainers = document.querySelectorAll('.prompt-container');
+  return Array.from(promptContainers).map(container => ({
+    id: snakeCase(container.querySelector('.prompt-title').value),
+    title: container.querySelector('.prompt-title').value,
+    prompt: container.querySelector('.prompt-text').value
+  }));
+}
+
+// Helper function to convert a string to snake case
+function snakeCase(str) {
+  return str.toLowerCase().replace(/\s+/g, '_');
+}
+
 // Restores select box and checkbox state using the preferences
 // stored in browserAPI.storage.
 function restoreOptions() {
@@ -28,15 +43,31 @@ function restoreOptions() {
     apiKey: '',
     llmModel: 'gpt-3.5-turbo',
     customEndpoint: '',
-    showDiff: false
+    showDiff: false,
+    customPrompts: []
   };
 
   browserAPI.storage.sync.get(defaults, (items) => {
-    document.getElementById('llmProvider').value = items.llmProvider;
-    document.getElementById('apiKey').value = items.apiKey;
-    document.getElementById('llmModel').value = items.llmModel;
-    document.getElementById('customEndpoint').value = items.customEndpoint;
-    document.getElementById('showDiff').checked = items.showDiff;
+    const elementIds = ['llmProvider', 'apiKey', 'llmModel', 'customEndpoint', 'showDiff'];
+
+    elementIds.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        if (id === 'showDiff') {
+          element.checked = items[id];
+        } else {
+          element.value = items[id];
+        }
+      } else {
+        console.error(`Element with id '${id}' not found`);
+      }
+    });
+
+    // Restore custom prompts
+    items.customPrompts.forEach(prompt => {
+      addPromptToUI(prompt.title, prompt.prompt, prompt.id);
+    });
+
     updateUIForProvider(items.llmProvider);
   });
 }
@@ -71,6 +102,38 @@ function updateUIForProvider(provider) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', restoreOptions);
+function addPromptToUI(title = '', prompt = '', id = '') {
+  const promptsContainer = document.getElementById('prompts-container');
+  const template = document.getElementById('prompt-template');
+  const promptElement = template.content.cloneNode(true);
+
+  promptElement.querySelector('.prompt-title').value = title;
+  promptElement.querySelector('.prompt-text').value = prompt;
+  
+  // Add a hidden input for the ID
+  const idInput = document.createElement('input');
+  idInput.type = 'hidden';
+  idInput.className = 'prompt-id';
+  idInput.value = id || snakeCase(title);
+  promptElement.querySelector('.prompt-container').appendChild(idInput);
+
+  promptElement.querySelector('.delete-prompt').addEventListener('click', function() {
+    this.closest('.prompt-container').remove();
+  });
+
+  promptsContainer.appendChild(promptElement);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded event fired');
+  restoreOptions();
+});
 document.getElementById('save').addEventListener('click', saveOptions);
 document.getElementById('llmProvider').addEventListener('change', (e) => updateUIForProvider(e.target.value));
+document.getElementById('add-prompt').addEventListener('click', () => addPromptToUI());
+
+function saveCustomPrompts(customPrompts) {
+  browserAPI.storage.sync.set({ customPrompts }, () => {
+    console.log('Custom prompts saved');
+  });
+}

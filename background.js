@@ -18,46 +18,36 @@ browserAPI.runtime.onInstalled.addListener(async (details) => {
     log(`Extension updated from version ${details.previousVersion} to ${browserAPI.runtime.getManifest().version}`);
   }
 
-  await browserAPI.contextMenus.create({
-    id: 'scramble',
-    title: 'Scramble',
-    contexts: ['selection'],
-  });
-
-  for (const prompt of DEFAULT_PROMPTS) {
-    await browserAPI.contextMenus.create({
-      id: prompt.id,
-      parentId: 'scramble',
-      title: prompt.title,
-      contexts: ['selection'],
-    });
-  }
+  await updateContextMenu();
 });
 
 // Handle context menu clicks
 browserAPI.contextMenus.onClicked.addListener((info, tab) => {
-  if (DEFAULT_PROMPTS.some(prompt => prompt.id === info.menuItemId)) {
-    // Check if the content script is loaded
-    browserAPI.tabs.sendMessage(tab.id, {action: 'ping'}, response => {
-      if (browserAPI.runtime.lastError) {
-        // Content script is not loaded, inject it
-        browserAPI.scripting.executeScript({
-          target: {tabId: tab.id},
-          files: ['content.js']
-        }, () => {
-          if (browserAPI.runtime.lastError) {
-            console.error('Failed to inject content script:', browserAPI.runtime.lastError);
-            return;
-          }
-          // Now send the actual message
+  browserAPI.storage.sync.get('customPrompts', ({ customPrompts = [] }) => {
+    const allPrompts = [...DEFAULT_PROMPTS, ...customPrompts];
+    if (allPrompts.some(prompt => prompt.id === info.menuItemId)) {
+      // Check if the content script is loaded
+      browserAPI.tabs.sendMessage(tab.id, {action: 'ping'}, response => {
+        if (browserAPI.runtime.lastError) {
+          // Content script is not loaded, inject it
+          browserAPI.scripting.executeScript({
+            target: {tabId: tab.id},
+            files: ['content.js']
+          }, () => {
+            if (browserAPI.runtime.lastError) {
+              console.error('Failed to inject content script:', browserAPI.runtime.lastError);
+              return;
+            }
+            // Now send the actual message
+            sendEnhanceTextMessage(tab.id, info.menuItemId, info.selectionText);
+          });
+        } else {
+          // Content script is already loaded, send the message
           sendEnhanceTextMessage(tab.id, info.menuItemId, info.selectionText);
-        });
-      } else {
-        // Content script is already loaded, send the message
-        sendEnhanceTextMessage(tab.id, info.menuItemId, info.selectionText);
-      }
-    });
-  }
+        }
+      });
+    }
+  });
 });
 
 async function sendEnhanceTextMessage(tabId, promptId, selectedText) {
@@ -93,13 +83,15 @@ browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Function to interact with various LLM APIs
 async function enhanceTextWithLLM(promptId, text) {
-  const storage = await browserAPI.storage.sync.get(null);
-  const llmProvider = storage.llmProvider;
+  const config = await getConfig();
+  const llmProvider = config.llmProvider;
+  const customPrompts = config.customPrompts || [];
   if (!llmProvider) {
     throw new Error('LLM provider not set. Please set it in the extension options.');
   }
   
-  const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId)?.prompt;
+  const allPrompts = [...DEFAULT_PROMPTS, ...customPrompts];
+  const prompt = allPrompts.find(p => p.id === promptId)?.prompt;
   if (!prompt) {
     throw new Error('Invalid prompt ID');
   }
@@ -124,10 +116,6 @@ async function enhanceWithOpenAI(prompt) {
   const config = await getConfig();
   if (!config.apiKey) {
     throw new Error('OpenAI API key not set. Please set it in the extension options.');
-  }
-
-  if (!config.llmModel) {
-    throw new Error('LLM model not set for OpenAI. Please set it in the extension options.');
   }
 
   const endpoint = config.customEndpoint || 'https://api.openai.com/v1/chat/completions';
@@ -334,7 +322,8 @@ async function getConfig() {
     llmProvider: 'openai',
     llmModel: 'gpt-3.5-turbo',
     customEndpoint: '',
-    showDiff: false
+    showDiff: false,
+    customPrompts: []
   };
   const config = await browserAPI.storage.sync.get(defaults);
   return {
@@ -342,7 +331,8 @@ async function getConfig() {
     llmModel: config.llmModel,
     customEndpoint: config.customEndpoint,
     llmProvider: config.llmProvider,
-    showDiff: config.showDiff
+    showDiff: config.showDiff,
+    customPrompts: config.customPrompts
   };
 }
 
@@ -350,3 +340,40 @@ function log(message, level = 'info') {
   const timestamp = new Date().toISOString();
   console[level](`[${timestamp}] ${message}`);
 }
+
+async function updateContextMenu() {
+  // Remove all existing menu items
+  await browserAPI.contextMenus.removeAll();
+
+  // Fetch custom prompts from storage
+  const config = await getConfig();
+  const customPrompts = config.customPrompts || [];
+
+  // Combine default and custom prompts
+  const allPrompts = [...DEFAULT_PROMPTS, ...customPrompts];
+
+  // Recreate the main menu item
+  await browserAPI.contextMenus.create({
+    id: 'scramble',
+    title: 'Scramble',
+    contexts: ['selection'],
+  });
+
+  // Create menu items for all prompts
+  for (const prompt of allPrompts) {
+    await browserAPI.contextMenus.create({
+      id: prompt.id,
+      parentId: 'scramble',
+      title: prompt.title,
+      contexts: ['selection'],
+    });
+  }
+}
+
+// ... existing code ...
+
+browserAPI.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && changes.customPrompts) {
+    updateContextMenu();
+  }
+});

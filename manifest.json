@@ -30,5 +30,11 @@
   },
   "action": {
     "default_popup": "popup.html"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["tailwind.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

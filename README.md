@@ -9,6 +9,10 @@ Scramble is an open-source Chrome extension that leverages AI to enhance your wr
 3. Enable "Developer mode" in the top right
 4. Click "Load unpacked" and select the extension directory
 
+## Development
+
+When developing you'll need to run `npx tailwindcss -i libs/tw-input.css -o libs/tw-output.css --minify --watch` in order to build the css on the fly.
+
 > Currently pending review on Chrome Web Store. Once approved, you can install it from there.
 
 ## Usage
@@ -45,10 +49,9 @@ Scramble comes with several pre-configured text enhancement options:
 
 Planned features include:
 
-- Custom user-defined prompts
 - Support for additional language models (LLMs)
+- Multiple LLM configurations at the same time
 - Enhanced context awareness
-- Integration with other AI services
 - View diff between original and improved text
 - Underline grammar / spelling issues
 - Local LLM so it doesn't rely on a third party
