@@ -1,6 +1,6 @@
 # Scramble - Open-Source Grammarly Alternative
 
-Scramble is an open-source Chrome extension that leverages AI to enhance your writing directly in your browser. It's designed to be a more customizable and privacy-respecting alternative to Grammarly.
+Scramble is an open-source Chrome extension that leverages AI to enhance your writing directly in your browser. It's designed to be a more customizable alternative to Grammarly by using specific prompts and allowing you to configure the LLM provider, model, and endpoint.
 
 ## Installation
 
@@ -21,6 +21,13 @@ Scramble is an open-source Chrome extension that leverages AI to enhance your wr
 Screenshot:
 <img width="728" alt="Screenshot 2024-09-17 at 10 14 30 PM" src="https://github.com/user-attachments/assets/7a8685e5-94dd-47be-a141-f84bcbf1321f">
 
+## Supported LLMs
+
+- OpenAI
+- Anthropic
+- Groq
+- Ollama (coming soon)
+
 
 ## Default Prompts
 
@@ -33,10 +40,6 @@ Scramble comes with several pre-configured text enhancement options:
 5. Summarize text
 6. Expand text
 7. Convert to bullet points
-
-## API Key
-
-**Important:** This extension requires an OpenAI API key to function. You need to provide your own API key in the extension settings. Please visit [OpenAI](https://openai.com/) to obtain an API key.
 
 ## Future Features
 
