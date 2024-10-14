@@ -70,29 +70,43 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Function to interact with OpenAI API
+// Function to interact with various LLM APIs
 async function enhanceTextWithLLM(promptId, text) {
-  // Retrieve API key from storage
-  const { openaiApiKey } = await browser.storage.sync.get('openaiApiKey');
+  // Retrieve settings from storage
+  const { llmProvider, openaiApiKey, anthropicApiKey, ollamaEndpoint } = await browser.storage.sync.get(['llmProvider', 'openaiApiKey', 'anthropicApiKey', 'ollamaEndpoint']);
+  
+  const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId).prompt;
+  const fullPrompt = `${prompt}:\n\n${text}`;
 
-  if (!openaiApiKey) {
+  switch (llmProvider) {
+    case 'openai':
+      return await enhanceWithOpenAI(openaiApiKey, fullPrompt);
+    case 'anthropic':
+      return await enhanceWithAnthropic(anthropicApiKey, fullPrompt);
+    case 'ollama':
+      return await enhanceWithOllama(ollamaEndpoint, fullPrompt);
+    default:
+      throw new Error('Invalid LLM provider selected');
+  }
+}
+
+async function enhanceWithOpenAI(apiKey, prompt) {
+  if (!apiKey) {
     throw new Error('OpenAI API key not set. Please set it in the extension options.');
   }
-
-  const prompt = DEFAULT_PROMPTS.find(p => p.id === promptId).prompt;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
+        'Authorization': `Bearer ${encodeURIComponent(apiKey)}`,
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo', // Update to a model available to you
         messages: [
           { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: `${prompt}\n\n${text}` }
+          { role: 'user', content: prompt }
         ],
         max_tokens: 1000,
         temperature: 0.7,
@@ -107,7 +121,67 @@ async function enhanceTextWithLLM(promptId, text) {
     const data = await response.json();
     return data.choices[0].message.content.trim();
   } catch (error) {
-    throw new Error(`Failed to enhance text. Please check your API key and try again. Error: ${error.message}`);
+    throw new Error(`Failed to enhance text with OpenAI. Error: ${error.message}`);
+  }
+}
+
+async function enhanceWithAnthropic(apiKey, prompt) {
+  if (!apiKey) {
+    throw new Error('Anthropic API key not set. Please set it in the extension options.');
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/complete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': apiKey,
+      },
+      body: JSON.stringify({
+        prompt: `Human: ${prompt}\n\nAssistant:`,
+        model: 'claude-2',
+        max_tokens_to_sample: 1000,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('API request failed');
+    }
+
+    const data = await response.json();
+    return data.completion.trim();
+  } catch (error) {
+    throw new Error(`Failed to enhance text with Anthropic. Error: ${error.message}`);
+  }
+}
+
+async function enhanceWithOllama(endpoint, prompt) {
+  if (!endpoint) {
+    throw new Error('Ollama endpoint not set. Please set it in the extension options.');
+  }
+
+  try {
+    const response = await fetch(`${endpoint}/api/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama2',
+        prompt: prompt,
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('API request failed');
+    }
+
+    const data = await response.json();
+    return data.response.trim();
+  } catch (error) {
+    throw new Error(`Failed to enhance text with Ollama. Error: ${error.message}`);
   }
 }
 
