@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Scramble",
   "version": "1.1",
   "description": "An Open-Source Grammarly alternative",
@@ -10,10 +10,13 @@
     "activeTab",
     "storage",
     "contextMenus",
-    "https://api.openai.com/*"
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -23,16 +26,9 @@
   ],
   "options_ui": {
     "page": "options.html",
-    "browser_style": true
-  },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "scramble@example.com",
-      "strict_min_version": "48.0"
-    }
+    "open_in_tab": true
   },
   "action": {
     "default_popup": "popup.html"
-  },
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3nzJuYJqG8x3ED6uT5+dsP9CpCNAVVxfSLA6AgOmn4zOxUoWT8OEmOu8AYS8NpBiQbAcOqIkrkjhClOWRkYpwg7NM4rRBHLGGOpTvKw1rq+4G1GAMD2OgqmlkRlUvN6YMaX12Vmdv8J+NGx61yPaFFfAeAtIvP0a4qi6GR6f0o84YJ99GURRpjGLnJjoAh3hbOKzPvWTa5Fu1t2mAUJaCYuwvTSMh6XhHPyU9tvUVfKIpLYKwY+pEvVhCYIVvWZ/9ylu75LeThEKnfB7cIWy+a+xrldqyc8EtdCoqgk7JGyI2n5vEwzOlod39tyTr/iXeoGFHQ0aZtpBSUyX4unDAQIDAQAB"
+  }
 }

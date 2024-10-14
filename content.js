@@ -1,9 +1,16 @@
+const browserAPI = chrome || browser;
+
 // Listen for messages from the background script
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('[SCRAMBLE] Received message:', request);
   if (request.action === 'enhanceText') {
-    enhanceSelectedText(request.promptId, request.selectedText)
+    enhanceSelectedText(request.promptId, request.selectedText, request.showDiff)
       .then(enhancedText => {
-        showDiffModal(request.selectedText, enhancedText);
+        if (request.showDiff) {
+          showDiffModal(request.selectedText, enhancedText);
+        } else {
+          replaceSelectedText(enhancedText);
+        }
         sendResponse({ success: true });
       })
       .catch(error => {
@@ -16,13 +23,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // Function to enhance selected text
-async function enhanceSelectedText(promptId, selectedText) {
+async function enhanceSelectedText(promptId, selectedText, showDiff) {
   console.log('[SCRAMBLE] Selected text:', promptId, selectedText);
   try {
-    const response = await browser.runtime.sendMessage({
+    const response = await browserAPI.runtime.sendMessage({
       action: 'enhanceText',
       promptId: promptId,
       selectedText: selectedText,
+      showDiff: showDiff
     });
     console.log('[SCRAMBLE] Response:', response);
 
