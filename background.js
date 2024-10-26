@@ -1,71 +1,78 @@
-// Add this at the beginning of your file
-const browserAPI = chrome || browser;
+const browserAPI = (typeof browser !== 'undefined' ? browser : chrome);
 
-// Define default prompts
 const DEFAULT_PROMPTS = [
-  { id: 'fix_grammar', title: 'Fix spelling and grammar', prompt: 'Please correct any spelling errors and grammatical mistakes in the following text:' },
-  { id: 'improve_writing', title: 'Improve writing', prompt: 'Please enhance the following text to improve its clarity, flow, and overall quality:' },
-  { id: 'make_professional', title: 'Make more professional', prompt: 'Please rewrite the following text to make it more formal and suitable for a professional context:' },
-  { id: 'simplify', title: 'Simplify text', prompt: 'Please simplify the following text to make it easier to understand, using simpler words and shorter sentences:' },
-  { id: 'summarize', title: 'Summarize text', prompt: 'Please provide a concise summary of the following text, capturing the main points:' },
-  { id: 'expand', title: 'Expand text', prompt: 'Please elaborate on the following text, adding more details and examples to make it more comprehensive:' },
-  { id: 'bullet_points', title: 'Convert to bullet points', prompt: 'Please convert the following text into a clear and concise bullet-point list:' },
+  { id: 'fix_grammar', title: 'Fix spelling and grammar', prompt: 'Fix the spelling and grammar. Return only the corrected text without quotes, explanations, or additional text:' },
+  { id: 'improve_writing', title: 'Improve writing', prompt: 'Enhance the following text to improve clarity and flow. Return only the improved text without quotes, explanations, or additional text:' },
+  { id: 'make_professional', title: 'Make more professional', prompt: 'Rewrite the text in a formal, professional tone. Return only the rewritten text without quotes, explanations, or additional text:' },
+  { id: 'simplify', title: 'Simplify text', prompt: 'Simplify this text using simpler words and shorter sentences. Return only the simplified text without quotes, explanations, or additional text:' },
+  { id: 'summarize', title: 'Summarize text', prompt: 'Provide a concise summary. Return only the summary without quotes, explanations, or additional text:' },
+  { id: 'expand', title: 'Expand text', prompt: 'Elaborate on this text with more details and examples. Return only the expanded text without quotes, explanations, or additional text:' },
+  { id: 'bullet_points', title: 'Convert to bullet points', prompt: 'Convert this text into bullet points. Return only the bullet-point list without quotes, explanations, or additional text:' },
 ];
 
-// Use 'browserAPI' for cross-browser compatibility
-browserAPI.runtime.onInstalled.addListener(async (details) => {
+if (typeof importScripts === 'function') {
+  browserAPI.runtime.onInstalled.addListener(handleInstall);
+} else {
+  handleInstall({ reason: 'install' });
+}
+
+async function handleInstall(details) {
   if (details.reason === 'update') {
     log(`Extension updated from version ${details.previousVersion} to ${browserAPI.runtime.getManifest().version}`);
   }
-
   await updateContextMenu();
-});
+}
 
-// Handle context menu clicks
+async function injectContentScript(tabId) {
+  try {
+    if (browserAPI === chrome) {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['content.js']
+      });
+    } else {
+      await browser.tabs.executeScript(tabId, {
+        file: 'content.js'
+      });
+    }
+  } catch (error) {
+    console.error('Failed to inject content script:', error);
+    throw error;
+  }
+}
+
 browserAPI.contextMenus.onClicked.addListener((info, tab) => {
-  browserAPI.storage.sync.get('customPrompts', ({ customPrompts = [] }) => {
+  browserAPI.storage.sync.get('customPrompts', async ({ customPrompts = [] }) => {
     const allPrompts = [...DEFAULT_PROMPTS, ...customPrompts];
     if (allPrompts.some(prompt => prompt.id === info.menuItemId)) {
-      // Check if the content script is loaded
-      browserAPI.tabs.sendMessage(tab.id, {action: 'ping'}, response => {
-        if (browserAPI.runtime.lastError) {
-          // Content script is not loaded, inject it
-          browserAPI.scripting.executeScript({
-            target: {tabId: tab.id},
-            files: ['content.js']
-          }, () => {
-            if (browserAPI.runtime.lastError) {
-              console.error('Failed to inject content script:', browserAPI.runtime.lastError);
-              return;
-            }
-            // Now send the actual message
-            sendEnhanceTextMessage(tab.id, info.menuItemId, info.selectionText);
-          });
-        } else {
-          // Content script is already loaded, send the message
-          sendEnhanceTextMessage(tab.id, info.menuItemId, info.selectionText);
+      try {
+        try {
+          await browserAPI.tabs.sendMessage(tab.id, { action: 'ping' });
+          await sendEnhanceTextMessage(tab.id, info.menuItemId, info.selectionText);
+        } catch (error) {
+          await injectContentScript(tab.id);
+          await sendEnhanceTextMessage(tab.id, info.menuItemId, info.selectionText);
         }
-      });
+      } catch (error) {
+        console.error('Error handling context menu click:', error);
+      }
     }
   });
 });
 
 async function sendEnhanceTextMessage(tabId, promptId, selectedText) {
-  const config = await getConfig();
-  // const showDiff = config.showDiff;
-  browserAPI.tabs.sendMessage(tabId, {
-    action: 'enhanceText',
-    promptId: promptId,
-    selectedText: selectedText,
-    // showDiff: showDiff
-  }, response => {
-    if (browserAPI.runtime.lastError) {
-      console.error('Error sending message:', browserAPI.runtime.lastError);
-    }
-  });
+  try {
+    await browserAPI.tabs.sendMessage(tabId, {
+      action: 'enhanceText',
+      promptId: promptId,
+      selectedText: selectedText,
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
 }
 
-// Handle messages from content script
 browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enhanceText') {
     enhanceTextWithRateLimit(request.promptId, request.selectedText)
@@ -76,12 +83,11 @@ browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
         log(`Error enhancing text: ${error.message}`, 'error');
         sendResponse({ success: false, error: error.message });
       });
-    return true; // Indicates that the response is asynchronous
+    return true;
   }
-  return false; // Handle unrecognized messages
+  return false;
 });
 
-// Function to interact with various LLM APIs
 async function enhanceTextWithLLM(promptId, text) {
   const config = await getConfig();
   const llmProvider = config.llmProvider;
@@ -267,9 +273,8 @@ async function enhanceWithGroq(prompt) {
   }
 }
 
-// Implement rate limiting
 const MAX_REQUESTS_PER_MINUTE = 10;
-const RATE_LIMIT_RESET_INTERVAL = 60000; // 1 minute in milliseconds
+const RATE_LIMIT_RESET_INTERVAL = 60000;
 
 const rateLimiter = (() => {
   let requestCount = 0;
@@ -310,19 +315,16 @@ const rateLimiter = (() => {
   };
 })();
 
-// Wrap the enhanceTextWithLLM function with improved rate limiting
 const enhanceTextWithRateLimit = (promptId, text) => {
   return rateLimiter(() => enhanceTextWithLLM(promptId, text));
 };
 
-// Add a function to get configuration
 async function getConfig() {
   const defaults = {
     apiKey: '',
     llmProvider: 'openai',
     llmModel: 'gpt-3.5-turbo',
     customEndpoint: '',
-    // showDiff: false,
     customPrompts: []
   };
   const config = await browserAPI.storage.sync.get(defaults);
@@ -331,7 +333,6 @@ async function getConfig() {
     llmModel: config.llmModel,
     customEndpoint: config.customEndpoint,
     llmProvider: config.llmProvider,
-    // showDiff: config.showDiff,
     customPrompts: config.customPrompts
   };
 }
@@ -342,35 +343,30 @@ function log(message, level = 'info') {
 }
 
 async function updateContextMenu() {
-  // Remove all existing menu items
-  await browserAPI.contextMenus.removeAll();
+  try {
+    await browserAPI.contextMenus.removeAll();
+    const config = await getConfig();
+    const customPrompts = config.customPrompts || [];
+    const allPrompts = [...DEFAULT_PROMPTS, ...customPrompts];
 
-  // Fetch custom prompts from storage
-  const config = await getConfig();
-  const customPrompts = config.customPrompts || [];
-
-  // Combine default and custom prompts
-  const allPrompts = [...DEFAULT_PROMPTS, ...customPrompts];
-
-  // Recreate the main menu item
-  await browserAPI.contextMenus.create({
-    id: 'scramble',
-    title: 'Scramble',
-    contexts: ['selection'],
-  });
-
-  // Create menu items for all prompts
-  for (const prompt of allPrompts) {
     await browserAPI.contextMenus.create({
-      id: prompt.id,
-      parentId: 'scramble',
-      title: prompt.title,
+      id: 'scramble',
+      title: 'Scramble',
       contexts: ['selection'],
     });
+
+    for (const prompt of allPrompts) {
+      await browserAPI.contextMenus.create({
+        id: prompt.id,
+        parentId: 'scramble',
+        title: prompt.title,
+        contexts: ['selection'],
+      });
+    }
+  } catch (error) {
+    console.error('Error updating context menu:', error);
   }
 }
-
-// ... existing code ...
 
 browserAPI.storage.onChanged.addListener((changes, area) => {
   if (area === 'sync' && changes.customPrompts) {
