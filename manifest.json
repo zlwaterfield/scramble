@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Scramble",
-  "version": "1.1",
+  "version": "1.2",
   "description": "An Open-Source Grammarly alternative",
   "icons": {
     "256": "assets/logo256.png"
