@@ -5,26 +5,31 @@ Scramble is an open-source Chrome extension that leverages AI to enhance your wr
 ## Extensions
 
 Chrome: https://chromewebstore.google.com/detail/scramble/mkaljgnigabhmjfookbokejhfghmkffo
+Firefox: WIP
 
 ## Installation
 
 #### Chrome Installation
 
 - Clone this repository
+- Run `npm install`
+- Run `npm run build`
 - Open Chrome and go to chrome://extensions/
 - Enable "Developer mode" in the top right
-- Click "Load unpacked" and select the extension directory
+- Click "Load unpacked" and select the extension directory (dist/chrome)
 
 #### Firefox Installation
 
 - Clone this repository
+- Run `npm install`
+- Run `npm run build`
 - Open Firefox and go to about:debugging#/runtime/this-firefox
 - Click "Load Temporary Add-on"
-- Navigate to the extension directory and select manifest_v2.json
+- Navigate to the extension directory (dist/firefox) and select manifest.json
 
 ## Development
 
-When developing you'll need to run `npx tailwindcss -i src/libs/tw-input.css -o src/libs/tw-output.css --minify --watch` in order to build the css on the fly.
+When developing you'll need to run `npx tailwindcss -i src/libs/tw-input.css -o src/libs/tw-output.css --minify --watch` in order to build the css on the fly. The runs automatically when you run `npm run build`.
 
 ## Usage
 
@@ -42,7 +47,6 @@ Screenshot:
 - Anthropic
 - Groq
 - Ollama (coming soon)
-
 
 ## Default Prompts
 
