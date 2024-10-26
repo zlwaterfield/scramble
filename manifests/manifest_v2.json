@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+  "name": "Scramble",
+  "version": "1.3",
+  "description": "An Open-Source Grammarly alternative",
+  "icons": {
+    "256": "assets/logo256.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "contextMenus",
+    "<all_urls>"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "me@zlwaterfield.com"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["libs/diff.min.js", "content.js"]
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "web_accessible_resources": [
+    "tailwind.css"
+  ]
+}

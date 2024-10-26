@@ -6,16 +6,16 @@ Scramble is designed with your privacy in mind. We collect and process only the 
 
 1. **Selected Text**: When you highlight text and use Scramble's features, the selected text is temporarily processed to provide the requested enhancements.
 
-2. **API Key**: Your OpenAI API key is stored locally in your browser's storage and is never transmitted to our servers.
+2. **API Key**: Your LLM API key is stored locally in your browser's storage and is never transmitted to our servers.
 
 ## Data Transmission
 
-- Selected text is sent directly to OpenAI's servers for processing using your personal API key.
+- Selected text is sent directly to the LLM provider's servers for processing using your personal API key.
 - We do not store, retain, or have access to the text you process or the results returned by OpenAI.
 
 ## Third-Party Services
 
-Scramble uses OpenAI's API to process text. Please refer to [OpenAI's privacy policy](https://openai.com/policies/privacy-policy) for information on how they handle data.
+Scramble uses the LLM provider's API to process text. Please refer to the LLM provider's privacy policy for information on how they handle data.
 
 ## Data Security
 
@@ -29,4 +29,4 @@ We may update this privacy policy from time to time. We will notify you of any c
 
 If you have any questions about this privacy policy, please contact us at [your contact information].
 
-Last updated: 2024-09-17
+Last updated: 2024-10-26

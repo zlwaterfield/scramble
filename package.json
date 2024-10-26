@@ -1,0 +1,12 @@
+{
+  "name": "scramble",
+  "version": "1.3",
+  "scripts": {
+    "css:watch": "npx tailwindcss -i src/libs/tw-input.css -o src/libs/tw-output.css --minify --watch",
+    "css:build": "npx tailwindcss -i src/libs/tw-input.css -o src/libs/tw-output.css --minify",
+    "build": "npm run css:build && node build.js"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0"
+  }
+}

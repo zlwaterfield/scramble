@@ -8,14 +8,23 @@ Chrome: https://chromewebstore.google.com/detail/scramble/mkaljgnigabhmjfookboke
 
 ## Installation
 
-1. Clone this repository or download the source code
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode" in the top right
-4. Click "Load unpacked" and select the extension directory
+#### Chrome Installation
+
+- Clone this repository
+- Open Chrome and go to chrome://extensions/
+- Enable "Developer mode" in the top right
+- Click "Load unpacked" and select the extension directory
+
+#### Firefox Installation
+
+- Clone this repository
+- Open Firefox and go to about:debugging#/runtime/this-firefox
+- Click "Load Temporary Add-on"
+- Navigate to the extension directory and select manifest_v2.json
 
 ## Development
 
-When developing you'll need to run `npx tailwindcss -i libs/tw-input.css -o libs/tw-output.css --minify --watch` in order to build the css on the fly.
+When developing you'll need to run `npx tailwindcss -i src/libs/tw-input.css -o src/libs/tw-output.css --minify --watch` in order to build the css on the fly.
 
 ## Usage
 
