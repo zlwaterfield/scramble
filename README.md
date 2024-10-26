@@ -4,8 +4,8 @@ Scramble is an open-source Chrome extension that leverages AI to enhance your wr
 
 ## Extensions
 
-Chrome: https://chromewebstore.google.com/detail/scramble/mkaljgnigabhmjfookbokejhfghmkffo
-Firefox: WIP
+- Chrome: https://chromewebstore.google.com/detail/scramble/mkaljgnigabhmjfookbokejhfghmkffo
+- Firefox: coming soon
 
 ## Installation
 
