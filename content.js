@@ -6,11 +6,11 @@ browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'enhanceText') {
     enhanceSelectedText(request.promptId, request.selectedText, request.showDiff)
       .then(enhancedText => {
-        if (request.showDiff) {
-          showDiffModal(request.selectedText, enhancedText);
-        } else {
+        // if (request.showDiff) {
+        //   showDiffModal(request.selectedText, enhancedText);
+        // } else {
           replaceSelectedText(enhancedText);
-        }
+        // }
         sendResponse({ success: true });
       })
       .catch(error => {
@@ -30,7 +30,7 @@ async function enhanceSelectedText(promptId, selectedText, showDiff) {
       action: 'enhanceText',
       promptId: promptId,
       selectedText: selectedText,
-      showDiff: showDiff
+      // showDiff: showDiff
     });
     console.log('[SCRAMBLE] Response:', response);
 
@@ -46,90 +46,90 @@ async function enhanceSelectedText(promptId, selectedText, showDiff) {
 }
 
 // Function to show diff modal and prompt user
-function showDiffModal(originalText, enhancedText) {
-  // Create modal elements
-  const modal = document.createElement('div');
-  modal.id = 'scramble-modal';
-  modal.style.cssText = `
-    position: fixed;
-    top: 10%;
-    left: 50%;
-    transform: translate(-50%, 0);
-    width: 80%;
-    max-width: 600px;
-    background-color: #fff;
-    border: 2px solid #2DD4BF;
-    border-radius: 8px;
-    z-index: 10000;
-    padding: 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  `;
+// function showDiffModal(originalText, enhancedText) {
+//   // Create modal elements
+//   const modal = document.createElement('div');
+//   modal.id = 'scramble-modal';
+//   modal.style.cssText = `
+//     position: fixed;
+//     top: 10%;
+//     left: 50%;
+//     transform: translate(-50%, 0);
+//     width: 80%;
+//     max-width: 600px;
+//     background-color: #fff;
+//     border: 2px solid #2DD4BF;
+//     border-radius: 8px;
+//     z-index: 10000;
+//     padding: 20px;
+//     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+//   `;
 
-  const title = document.createElement('h2');
-  title.textContent = 'Review Changes';
-  modal.appendChild(title);
+//   const title = document.createElement('h2');
+//   title.textContent = 'Review Changes';
+//   modal.appendChild(title);
 
-  const diffContainer = document.createElement('div');
-  diffContainer.style.cssText = 'max-height: 400px; overflow-y: auto; margin-bottom: 20px;';
-  diffContainer.innerHTML = generateDiffHTML(originalText, enhancedText);
-  modal.appendChild(diffContainer);
+//   const diffContainer = document.createElement('div');
+//   diffContainer.style.cssText = 'max-height: 400px; overflow-y: auto; margin-bottom: 20px;';
+//   diffContainer.innerHTML = generateDiffHTML(originalText, enhancedText);
+//   modal.appendChild(diffContainer);
 
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.textAlign = 'right';
+//   const buttonContainer = document.createElement('div');
+//   buttonContainer.style.textAlign = 'right';
 
-  const acceptButton = document.createElement('button');
-  acceptButton.textContent = 'Accept';
-  acceptButton.style.cssText = `
-    background-color: #2DD4BF;
-    color: white;
-    padding: 10px 20px;
-    margin-right: 10px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  `;
-  acceptButton.onclick = () => {
-    replaceSelectedText(enhancedText);
-    closeModal();
-  };
+//   const acceptButton = document.createElement('button');
+//   acceptButton.textContent = 'Accept';
+//   acceptButton.style.cssText = `
+//     background-color: #2DD4BF;
+//     color: white;
+//     padding: 10px 20px;
+//     margin-right: 10px;
+//     border: none;
+//     border-radius: 8px;
+//     cursor: pointer;
+//   `;
+//   acceptButton.onclick = () => {
+//     replaceSelectedText(enhancedText);
+//     closeModal();
+//   };
 
-  const cancelButton = document.createElement('button');
-  cancelButton.textContent = 'Cancel';
-  cancelButton.style.cssText = `
-    background-color: #ccc;
-    color: #333;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  `;
-  cancelButton.onclick = closeModal;
+//   const cancelButton = document.createElement('button');
+//   cancelButton.textContent = 'Cancel';
+//   cancelButton.style.cssText = `
+//     background-color: #ccc;
+//     color: #333;
+//     padding: 10px 20px;
+//     border: none;
+//     border-radius: 8px;
+//     cursor: pointer;
+//   `;
+//   cancelButton.onclick = closeModal;
 
-  buttonContainer.appendChild(acceptButton);
-  buttonContainer.appendChild(cancelButton);
-  modal.appendChild(buttonContainer);
+//   buttonContainer.appendChild(acceptButton);
+//   buttonContainer.appendChild(cancelButton);
+//   modal.appendChild(buttonContainer);
 
-  document.body.appendChild(modal);
+//   document.body.appendChild(modal);
 
-  // Add overlay
-  const overlay = document.createElement('div');
-  overlay.id = 'scramble-overlay';
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 9999;
-  `;
-  document.body.appendChild(overlay);
+//   // Add overlay
+//   const overlay = document.createElement('div');
+//   overlay.id = 'scramble-overlay';
+//   overlay.style.cssText = `
+//     position: fixed;
+//     top: 0;
+//     left: 0;
+//     width: 100%;
+//     height: 100%;
+//     background-color: rgba(0,0,0,0.5);
+//     z-index: 9999;
+//   `;
+//   document.body.appendChild(overlay);
 
-  function closeModal() {
-    modal.remove();
-    overlay.remove();
-  }
-}
+//   function closeModal() {
+//     modal.remove();
+//     overlay.remove();
+//   }
+// }
 
 // Function to generate diff HTML
 function generateDiffHTML(originalText, enhancedText) {

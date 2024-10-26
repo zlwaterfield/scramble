@@ -7,7 +7,7 @@ function saveOptions() {
     apiKey: document.getElementById('apiKey').value,
     llmModel: document.getElementById('llmModel').value,
     customEndpoint: document.getElementById('customEndpoint').value,
-    showDiff: document.getElementById('showDiff').checked,
+    // showDiff: document.getElementById('showDiff').checked,
     customPrompts: getCustomPrompts()
   };
 
@@ -43,21 +43,21 @@ function restoreOptions() {
     apiKey: '',
     llmModel: 'gpt-3.5-turbo',
     customEndpoint: '',
-    showDiff: false,
+    // showDiff: false,
     customPrompts: []
   };
 
   browserAPI.storage.sync.get(defaults, (items) => {
-    const elementIds = ['llmProvider', 'apiKey', 'llmModel', 'customEndpoint', 'showDiff'];
+    const elementIds = ['llmProvider', 'apiKey', 'llmModel', 'customEndpoint'];
 
     elementIds.forEach(id => {
       const element = document.getElementById(id);
       if (element) {
-        if (id === 'showDiff') {
-          element.checked = items[id];
-        } else {
+        // if (id === 'showDiff') {
+        //   element.checked = items[id];
+        // } else {
           element.value = items[id];
-        }
+        // }
       } else {
         console.error(`Element with id '${id}' not found`);
       }

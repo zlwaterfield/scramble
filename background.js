@@ -52,12 +52,12 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 
 async function sendEnhanceTextMessage(tabId, promptId, selectedText) {
   const config = await getConfig();
-  const showDiff = config.showDiff;
+  // const showDiff = config.showDiff;
   browserAPI.tabs.sendMessage(tabId, {
     action: 'enhanceText',
     promptId: promptId,
     selectedText: selectedText,
-    showDiff: showDiff
+    // showDiff: showDiff
   }, response => {
     if (browserAPI.runtime.lastError) {
       console.error('Error sending message:', browserAPI.runtime.lastError);
@@ -322,7 +322,7 @@ async function getConfig() {
     llmProvider: 'openai',
     llmModel: 'gpt-3.5-turbo',
     customEndpoint: '',
-    showDiff: false,
+    // showDiff: false,
     customPrompts: []
   };
   const config = await browserAPI.storage.sync.get(defaults);
@@ -331,7 +331,7 @@ async function getConfig() {
     llmModel: config.llmModel,
     customEndpoint: config.customEndpoint,
     llmProvider: config.llmProvider,
-    showDiff: config.showDiff,
+    // showDiff: config.showDiff,
     customPrompts: config.customPrompts
   };
 }
