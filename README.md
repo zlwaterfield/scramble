@@ -39,7 +39,8 @@ When developing you'll need to run `npx tailwindcss -i src/libs/tw-input.css -o 
 4. Wait for the AI to process and enhance your text
 
 Screenshot:
-<img width="728" alt="Screenshot 2024-09-17 at 10 14 30 PM" src="https://github.com/user-attachments/assets/7a8685e5-94dd-47be-a141-f84bcbf1321f">
+
+<img width="600" alt="Screenshot 2024-09-17 at 10 14 30 PM" src="https://github.com/user-attachments/assets/7a8685e5-94dd-47be-a141-f84bcbf1321f">
 
 ## Supported LLMs
 
