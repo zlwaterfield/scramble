@@ -46,6 +46,7 @@ Screenshot:
 - OpenAI
 - Anthropic
 - Groq
+- OpenRouter
 - Ollama (coming soon)
 
 ## Default Prompts

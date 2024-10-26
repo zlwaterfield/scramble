@@ -108,6 +108,7 @@ async function enhanceTextWithLLM(promptId, text) {
     anthropic: enhanceWithAnthropic,
     ollama: enhanceWithOllama,
     groq: enhanceWithGroq,
+    openrouter: enhanceWithOpenRouter, // Add OpenRouter to the enhanceFunctions object
   };
 
   const enhanceFunction = enhanceFunctions[llmProvider];
@@ -270,6 +271,46 @@ async function enhanceWithGroq(prompt) {
   } catch (error) {
     console.error('Groq API error:', error);
     throw new Error(`Failed to enhance text with Groq. Error: ${error.message}`);
+  }
+}
+
+async function enhanceWithOpenRouter(prompt) {
+  const config = await getConfig();
+  if (!config.apiKey) {
+    throw new Error('OpenRouter API key not set. Please set it in the extension options.');
+  }
+
+  const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${encodeURIComponent(config.apiKey)}`,
+        'X-Title': 'Scramble Browser Extension',
+      },
+      body: JSON.stringify({
+        model: config.llmModel || 'openai/gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`OpenRouter API request failed: ${errorData.error || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('OpenRouter API error:', error);
+    throw new Error(`Failed to enhance text with OpenRouter. Error: ${error.message}`);
   }
 }
 

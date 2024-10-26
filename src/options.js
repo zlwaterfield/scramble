@@ -128,6 +128,11 @@ function updateUIForProvider(provider) {
         llmModelLabel.textContent = 'Groq Model:';
         customEndpointContainer.style.display = 'block';
         break;
+      case 'openrouter':
+        apiKeyLabel.textContent = 'OpenRouter API Key:';
+        llmModelLabel.textContent = 'OpenRouter Model:';
+        customEndpointContainer.style.display = 'block';
+        break;
       default:
         console.warn(`Unknown provider: ${provider}`);
         break;
