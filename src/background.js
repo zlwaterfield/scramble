@@ -85,6 +85,17 @@ browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true;
   }
+  if (request.action === 'getSuggestions') {
+    getSuggestionsWithLLM(request.text)
+      .then(suggestions => {
+        sendResponse({ success: true, suggestions });
+      })
+      .catch(error => {
+        log(`Error getting suggestions: ${error.message}`, 'error');
+        sendResponse({ success: false, error: error.message });
+      });
+    return true;
+  }
   return false;
 });
 
@@ -311,6 +322,28 @@ async function enhanceWithOpenRouter(prompt) {
   } catch (error) {
     console.error('OpenRouter API error:', error);
     throw new Error(`Failed to enhance text with OpenRouter. Error: ${error.message}`);
+  }
+}
+
+async function getSuggestionsWithLLM(text) {
+  const config = await getConfig();
+  if (!config.llmProvider) {
+    throw new Error('LLM provider not set');
+  }
+
+  const prompt = 'Analyze this text for potential improvements. For each suggestion, provide: 1) the specific text to improve, 2) a brief explanation of why it should be improved, and 3) a suggested improvement. Format as JSON array with structure: [{"text": "...", "explanation": "...", "suggestion": "..."}]. Limit to the most important 2-3 suggestions:';
+  const fullPrompt = `${prompt}:\n\n${text}`;
+
+  const enhanceFunction = enhanceFunctions[config.llmProvider];
+  if (!enhanceFunction) {
+    throw new Error('Invalid LLM provider selected');
+  }
+
+  const response = await enhanceFunction(fullPrompt);
+  try {
+    return JSON.parse(response);
+  } catch (error) {
+    throw new Error('Failed to parse suggestions response');
   }
 }
 
