@@ -62,6 +62,13 @@ Scramble comes with several pre-configured text enhancement options:
 6. Expand text
 7. Convert to bullet points
 
+## Custom Prompts
+
+You can also create your own custom prompts. They will show up in the list of prompts as soon as you save.
+
+<img width="755" alt="Screenshot 2024-11-02 at 10 00 47 AM" src="https://github.com/user-attachments/assets/add93ae6-0018-4845-91cc-a43a1d95077c">
+
+
 ## Future Features
 
 Planned features include:
