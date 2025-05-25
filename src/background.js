@@ -107,8 +107,9 @@ async function enhanceTextWithLLM(promptId, text) {
     openai: enhanceWithOpenAI,
     anthropic: enhanceWithAnthropic,
     ollama: enhanceWithOllama,
+    lmstudio: enhanceWithLMStudio,
     groq: enhanceWithGroq,
-    openrouter: enhanceWithOpenRouter, // Add OpenRouter to the enhanceFunctions object
+    openrouter: enhanceWithOpenRouter,
   };
 
   const enhanceFunction = enhanceFunctions[llmProvider];
@@ -198,7 +199,7 @@ async function enhanceWithAnthropic(prompt) {
 }
 
 async function enhanceWithOllama(prompt) {
-  const { llmModel, customEndpoint } = await browserAPI.storage.sync.get(['llmModel', 'customEndpoint']);
+  const { llmModel, customEndpoint, apiKey } = await browserAPI.storage.sync.get(['llmModel', 'customEndpoint', 'apiKey']);
 
   if (!llmModel) {
     throw new Error('LLM model not set for Ollama. Please set it in the extension options.');
@@ -207,26 +208,102 @@ async function enhanceWithOllama(prompt) {
   const endpoint = customEndpoint || 'http://localhost:11434/api/generate';
 
   try {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authorization header if API key is provided (for remote Ollama instances)
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: JSON.stringify({
         model: llmModel || 'llama2',
         prompt: prompt,
         stream: false,
+        options: {
+          temperature: 0.7,
+          top_p: 0.9,
+          top_k: 40,
+        }
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Ollama API request failed');
+      const errorText = await response.text();
+      throw new Error(`Ollama API request failed: ${response.status} ${response.statusText}. ${errorText}`);
     }
 
     const data = await response.json();
+    
+    if (!data.response) {
+      throw new Error('Invalid response from Ollama API: missing response field');
+    }
+
     return data.response.trim();
   } catch (error) {
+    if (error.message.includes('fetch')) {
+      throw new Error(`Failed to connect to Ollama. Make sure Ollama is running on ${endpoint.split('/api')[0]}. Error: ${error.message}`);
+    }
     throw new Error(`Failed to enhance text with Ollama. Error: ${error.message}`);
+  }
+}
+
+// NEW: Add LM Studio support
+async function enhanceWithLMStudio(prompt) {
+  const { llmModel, customEndpoint, apiKey } = await browserAPI.storage.sync.get(['llmModel', 'customEndpoint', 'apiKey']);
+
+  if (!llmModel) {
+    throw new Error('LLM model not set for LM Studio. Please set it in the extension options.');
+  }
+
+  const endpoint = customEndpoint || 'http://localhost:1234/v1/chat/completions';
+
+  try {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authorization header if API key is provided
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: llmModel,
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7,
+        stream: false
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`LM Studio API request failed: ${response.status} ${response.statusText}. ${errorText}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response from LM Studio API: missing choices or message');
+    }
+
+    return data.choices[0].message.content.trim();
+  } catch (error) {
+    if (error.message.includes('fetch')) {
+      throw new Error(`Failed to connect to LM Studio. Make sure LM Studio server is running on ${endpoint.split('/v1')[0]}. Error: ${error.message}`);
+    }
+    throw new Error(`Failed to enhance text with LM Studio. Error: ${error.message}`);
   }
 }
 
