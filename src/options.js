@@ -104,8 +104,20 @@ function updateUIForProvider(provider) {
     const customEndpointContainer = document.getElementById('customEndpoint').parentElement;
 
     if (!apiKeyLabel || !llmModelLabel || !customEndpointLabel) {
-      throw new Error('Required UI elements not found');
+      // Fallback: find labels by their span text content
+      const labels = document.querySelectorAll('label span');
+      const apiKeySpan = Array.from(labels).find(span => span.textContent.includes('API Key'));
+      const modelSpan = Array.from(labels).find(span => span.textContent.includes('Model'));
+      const endpointSpan = Array.from(labels).find(span => span.textContent.includes('Endpoint'));
+      
+      if (!apiKeySpan || !modelSpan || !endpointSpan) {
+        console.warn('Could not find required UI labels');
+        return;
+      }
     }
+
+    // Show all containers by default
+    customEndpointContainer.style.display = 'block';
 
     switch (provider) {
       case 'openai':
@@ -121,6 +133,11 @@ function updateUIForProvider(provider) {
       case 'ollama':
         apiKeyLabel.textContent = 'Ollama API Key (if required):';
         llmModelLabel.textContent = 'Ollama Model:';
+        customEndpointContainer.style.display = 'block';
+        break;
+      case 'lmstudio':
+        apiKeyLabel.textContent = 'LM Studio API Key (if required):';
+        llmModelLabel.textContent = 'LM Studio Model:';
         customEndpointContainer.style.display = 'block';
         break;
       case 'groq':
