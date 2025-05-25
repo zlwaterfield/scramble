@@ -33,8 +33,17 @@
             </label>
             <label class="block">
                 <span class="text-gray-700">LLM Model:</span>
-                <input type="text" id="llmModel" placeholder="Enter the LLM model (e.g., gpt-3.5-turbo)" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <div class="flex gap-2">
+                    <input type="text" id="llmModel" placeholder="Enter the LLM model (e.g., gpt-3.5-turbo)" class="mt-1 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <button id="fetchModels" type="button" class="mt-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <span id="fetchModelsText">Fetch Models</span>
+                        <span id="fetchModelsSpinner" class="hidden">⟳</span>
+                    </button>
+                </div>
                 <small id="modelHelp" class="text-gray-500 text-sm mt-1 block"></small>
+                <select id="availableModels" class="mt-2 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 hidden">
+                    <option value="">Select a model...</option>
+                </select>
             </label>
             <label class="block">
                 <span class="text-gray-700">Custom Endpoint (optional):</span>
