@@ -50,7 +50,8 @@ Screenshot:
 - Anthropic
 - Groq
 - OpenRouter
-- Ollama (coming soon)
+- Ollama
+- LM Studio
 
 ## Default Prompts
 
@@ -80,7 +81,6 @@ Planned features include:
 - Enhanced context awareness
 - View diff between original and improved text
 - Underline grammar / spelling issues
-- Local LLM so it doesn't rely on a third party
 
 ## Contributing
 
